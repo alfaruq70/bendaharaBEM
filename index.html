@@ -122,6 +122,13 @@ textarea{min-height:90px;resize:vertical}
     .topbar h1{font-size:16px}
 }
 
+.topbar-right{display:flex;align-items:center;gap:12px}
+@media(max-width:768px){
+    .topbar{height:auto;min-height:60px;padding:8px 12px;gap:8px}
+    .topbar-right{flex-wrap:wrap;justify-content:flex-end;gap:6px}
+    .topbar-info span{display:none}
+    .topbar h1{font-size:15px}
+}
 .form-grid.three{grid-template-columns:repeat(3,1fr)}
 @media(max-width:768px){.form-grid.three{grid-template-columns:1fr}}
 .btn-link{text-decoration:none;display:inline-block}
@@ -168,7 +175,7 @@ body.locked .sidebar,body.locked .main,body.locked .float-remind{display:none!im
 
 body.viewer .admin-only{display:none!important}
 
-/* Print */
+/* Mode gelap & bar kategori */
 html.dark{filter:invert(1) hue-rotate(180deg);background:#fff}html.dark img,html.dark canvas{filter:invert(1) hue-rotate(180deg)}
 .bar-row{display:grid;grid-template-columns:130px 1fr 110px;gap:10px;align-items:center;font-size:13px;margin:8px 0}.bar-row i{display:block;height:9px;border-radius:9px;background:var(--danger)}
 @media print{
@@ -234,9 +241,13 @@ html.dark{filter:invert(1) hue-rotate(180deg);background:#fff}html.dark img,html
     <div class="menu-title">Laporan</div>
     <button class="nav-btn" onclick="showPage('laporan',this)">📄 Laporan Keuangan</button>
     <button class="nav-btn" onclick="showPage('evaluasi',this)">📈 Evaluasi Keuangan</button>
+
+    <div class="menu-title">Informasi</div>
     <button class="nav-btn" onclick="showPage('pengumuman',this)">📢 Pengumuman</button>
     <button class="nav-btn" onclick="showPage('kalender',this)">🗓 Kalender</button>
-    <button class="nav-btn" onclick="showPage('bayar',this)">💳 Bayar Kas (QRIS)</button>
+
+    <div class="menu-title">Pembayaran Online</div>
+    <button class="nav-btn" onclick="showPage('bayar',this)">📲 Bayar Kas (QRIS)</button>
     <button class="nav-btn admin-only" onclick="showPage('konfirmasi',this)">✅ Konfirmasi Bayar <b id="pendBadge"></b></button>
 
     <div class="menu-title admin-only">Pengaturan</div>
@@ -254,7 +265,7 @@ html.dark{filter:invert(1) hue-rotate(180deg);background:#fff}html.dark img,html
         <button class="mobile-menu" onclick="toggleSidebar()">☰</button>
         <h1 id="pageHeader">Dashboard Bendahara</h1>
     </div>
-    <div style="display:flex;align-items:center;gap:12px;">
+    <div class="topbar-right">
         <div class="topbar-info">
             <strong id="userName">Bendahara BEM</strong>
             <span id="currentDate"></span>
@@ -322,7 +333,18 @@ html.dark{filter:invert(1) hue-rotate(180deg);background:#fff}html.dark img,html
 <section class="page" id="page-anggota">
     <div class="page-title">
         <h2>Data Anggota BEM</h2>
-        <p>Kelola data pengurus dan anggota BEM.</p>
+        <p>Kelola data pengurus BEM serta pengaturan kas wajib.</p>
+    </div>
+
+    <div class="panel admin-only">
+        <div class="panel-header"><h3>⚙️ Pengaturan Kas Wajib</h3></div>
+        <div class="form-grid three">
+            <div class="form-group"><label for="kasWajibDefault">Kas wajib / mahasiswa / bulan</label><input type="number" id="kasWajibDefault" min="0"></div>
+            <div class="form-group"><label for="kasJatuhTempo">Jatuh tempo (tanggal tiap bulan)</label><input type="number" id="kasJatuhTempo" min="1" max="28"></div>
+            <div class="form-group"><label for="kasMulai">Mulai ditagih (bulan)</label><input type="month" id="kasMulai"></div>
+        </div>
+        <div class="toolbar" style="margin:12px 0 0"><button class="btn btn-primary" onclick="saveKasWajib()">Simpan Pengaturan</button></div>
+        <p class="hint">Mahasiswa aktif yang belum lunas setelah jatuh tempo dianggap telat dan muncul di pengingat dashboard. Kosongkan "Mulai ditagih" untuk hanya menghitung bulan berjalan.</p>
     </div>
 
     <div class="panel">
@@ -446,16 +468,7 @@ html.dark{filter:invert(1) hue-rotate(180deg);background:#fff}html.dark img,html
         <div class="card warning"><small>Belum Lunas (bulan ini)</small><h3 id="totalBelumBulanIni">0</h3></div>
     </div>
 
-    <div class="panel admin-only">
-        <div class="panel-header"><h3>Pengaturan Kas</h3></div>
-        <div class="form-grid three">
-            <div class="form-group"><label for="kasWajibDefault">Kas wajib / mahasiswa / bulan</label><input type="number" id="kasWajibDefault" min="0"></div>
-            <div class="form-group"><label for="kasJatuhTempo">Jatuh tempo (tanggal tiap bulan)</label><input type="number" id="kasJatuhTempo" min="1" max="28"></div>
-            <div class="form-group"><label for="kasMulai">Mulai ditagih (bulan)</label><input type="month" id="kasMulai"></div>
-        </div>
-        <div class="toolbar" style="margin:12px 0 0"><button class="btn btn-primary" onclick="saveKasWajib()">Simpan Pengaturan</button></div>
-        <p class="hint">Mahasiswa aktif yang belum lunas setelah jatuh tempo dianggap telat dan muncul di pengingat dashboard. Kosongkan "Mulai ditagih" untuk hanya menghitung bulan berjalan.</p>
-    </div>
+    <p class="hint admin-only" style="margin:-8px 0 16px">⚙️ Nominal kas wajib, jatuh tempo, dan bulan mulai ditagih diatur di menu <a href="#" onclick="showPage('anggota',document.querySelectorAll('.nav-btn')[1]);return false">Data Anggota BEM</a>.</p>
 
     <div class="panel">
         <div class="panel-header">
@@ -2159,10 +2172,6 @@ async function boot(){
     else showAuth("login");
 }
 
-document.addEventListener("visibilitychange",()=>{
-    if(!document.hidden) refreshData(false);
-});
-
 /* ---------- Login admin / lupa password ---------- */
 $("loginForm").addEventListener("submit",async function(e){
     e.preventDefault();
@@ -2446,6 +2455,7 @@ function stopReminderLoop(){
 // kembali ke tab setelah lama ditinggal -> ingatkan lagi
 document.addEventListener("visibilitychange",()=>{
     if(document.hidden){ lastHiddenAt = Date.now(); return; }
+    refreshData(false);
     if(currentUser && lastHiddenAt && Date.now()-lastHiddenAt>30000){ remindOpen = true; renderFloatingReminder(); }
 });
 
@@ -2622,7 +2632,7 @@ async function loadPending(){
     const {data,error}=await sb.from("bukti_bayar").select("id,data").order("id");
     if(error){ $("pendList").innerHTML='<p class="hint">Tabel bukti_bayar belum siap: '+escapeHTML(error.message)+'</p>'; return; }
     PEND=data.map(r=>({...r.data,id:r.id})); $("pendBadge").textContent=PEND.length?"("+PEND.length+")":"";
-    $("pendList").innerHTML=PEND.length?PEND.map(p=>`<div style="display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)"><img src="${p.bukti}" style="width:56px;height:56px;object-fit:cover;border-radius:8px;cursor:pointer" onclick="this.style.cssText==''?0:0;showBukti('${p.id}')"><div style="flex:1"><b>${escapeHTML(p.nama)}</b><br><small>${escapeHTML(p.bulan)} ${escapeHTML(p.tahun)} · ${rupiah(p.nominal)} · ${escapeHTML(p.metode)} · ${escapeHTML(p.tanggal)}</small></div><button class="btn btn-sm btn-success" onclick="terimaBukti('${p.id}')">Terima</button><button class="btn btn-sm btn-danger" onclick="tolakBukti('${p.id}')">Tolak</button></div>`).join(""):'<p class="hint">Tidak ada bukti menunggu konfirmasi.</p>';
+    $("pendList").innerHTML=PEND.length?PEND.map(p=>`<div style="display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)"><img src="${p.bukti}" style="width:56px;height:56px;object-fit:cover;border-radius:8px;cursor:pointer" onclick="showBukti('${p.id}')"><div style="flex:1"><b>${escapeHTML(p.nama)}</b><br><small>${escapeHTML(p.bulan)} ${escapeHTML(p.tahun)} · ${rupiah(p.nominal)} · ${escapeHTML(p.metode)} · ${escapeHTML(p.tanggal)}</small></div><button class="btn btn-sm btn-success" onclick="terimaBukti('${p.id}')">Terima</button><button class="btn btn-sm btn-danger" onclick="tolakBukti('${p.id}')">Tolak</button></div>`).join(""):'<p class="hint">Tidak ada bukti menunggu konfirmasi.</p>';
 }
 function showBukti(id){ const p=PEND.find(x=>x.id===id); if(!p) return; const o=document.createElement("div"); o.style.cssText="position:fixed;inset:0;background:#000b;z-index:9999;display:grid;place-items:center;padding:16px"; o.innerHTML=`<img src="${p.bukti}" style="max-width:100%;max-height:92vh;border-radius:10px">`; o.onclick=()=>o.remove(); document.body.appendChild(o); }
 async function terimaBukti(id){
