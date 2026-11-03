@@ -2660,14 +2660,14 @@ function parseCSV(t){ t=t.replace(/^\uFEFF/,""); const d=((t.split(/\r?\n/)[0]||
     r.push(c); if(r.some(x=>x.trim()))rows.push(r); return rows; }
 function impCSV(ev){
     if(!requireAdmin()) return; const f=ev.target.files[0]; ev.target.value=""; if(!f) return;
-    f.text().then(t=>{ const rows=parseCSV(t), h=rows.shift().map(x=>x.trim().toLowerCase()), ix=k=>h.indexOf(k);
-        if(ix("nama")<0){ alert('Kolom "nama" tidak ditemukan. Unduh template CSV dulu.'); return; }
+    f.text().then(t=>{ const rows=parseCSV(t), h=(rows.shift()||[]).map(canonHeader), ix=k=>h.indexOf(k);
+        if(ix("nama")<0){ alert('Kolom "nama" tidak ditemukan. Judul kolom harus berada di baris pertama. Unduh template CSV dulu.'); return; }
         const add=[]; let dup=0;
         rows.forEach(r=>{ const g=k=>ix(k)>=0?(r[ix(k)]||"").trim():"", nama=g("nama").toUpperCase(), nim=g("nim"); if(!nama) return;
             if([...db.mahasiswa,...add].some(x=>(nim&&x.nim===nim)||x.nama===nama)){dup++;return;}
-            add.push({id:generateId(),nama,nim,prodi:g("prodi").toUpperCase(),semester:g("semester"),wa:g("wa"),status:g("status")==="Tidak Aktif"?"Tidak Aktif":"Aktif"}); });
+            add.push({id:generateId(),nama,nim,prodi:g("prodi").toUpperCase(),semester:g("semester"),wa:normWa(g("wa")),status:g("status").toLowerCase()==="tidak aktif"?"Tidak Aktif":"Aktif"}); });
         if(!add.length){ alert("Tidak ada mahasiswa baru. Dilewati (sudah ada): "+dup); return; }
-        if(confirm(`Impor ${add.length} mahasiswa baru? (${dup} dilewati karena sudah ada)`)){ db.mahasiswa.push(...add); saveDB(); showToast(add.length+" mahasiswa diimpor."); } });
+        if(confirm(`Impor ${add.length} mahasiswa baru? (${dup} dilewati karena sudah ada)`+headerReport(h))){ db.mahasiswa.push(...add); saveDB(); showToast(add.length+" mahasiswa diimpor."); } });
 }
 function tplCSV(){ const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob(["\uFEFFnama,nim,prodi,semester,wa,status\nContoh Nama,2501031001,PAI,3,081234567890,Aktif\n"],{type:"text/csv"})); a.download="template-mahasiswa.csv"; a.click(); }
 (()=>{ const h=document.querySelector("#page-mahasiswa .panel-header"); if(!h) return; const w=document.createElement("span"); w.className="admin-only";
@@ -2675,6 +2675,34 @@ function tplCSV(){ const a=document.createElement("a"); a.href=URL.createObjectU
 const _showPage=showPage; showPage=function(p,b){ _showPage(p,b); if(p==="konfirmasi") loadPending(); };
 const _updateAll2=updateAll; updateAll=function(){ _updateAll2(); renderKalender(); renderBayar(); };
 
+
+/* ===== Bantuan impor CSV: nama kolom toleran, nomor WA, laporan ===== */
+const CSV_ALIAS = {
+    nama:["nama","namalengkap","namaanggota","namamahasiswa","name"],
+    nim:["nim","npm","nomorinduk","nomorindukmahasiswa"],
+    divisi:["divisi","bidang","departemen","seksi"],
+    jabatan:["jabatan","posisi"],
+    prodi:["prodi","programstudi","jurusan"],
+    semester:["semester","smt"],
+    wa:["wa","whatsapp","nowa","nomorwa","nowhatsapp","nomorwhatsapp","nohp","nomorhp","hp","telepon","notelepon","telp"],
+    status:["status","keaktifan"]
+};
+function canonHeader(h){
+    const n=String(h||"").toLowerCase().replace(/[^a-z0-9]/g,"");
+    for(const k in CSV_ALIAS) if(CSV_ALIAS[k].includes(n)) return k;
+    return "?"+String(h||"").trim();
+}
+function normWa(v){
+    let n=String(v||"").replace(/\D/g,"");
+    if(!n) return "";
+    if(n.startsWith("62")) return "0"+n.slice(2);
+    if(n.startsWith("8")) n="0"+n;          // Excel sering menghapus angka 0 di depan
+    return n;
+}
+function headerReport(h){
+    const ignored=h.filter(x=>x.startsWith("?")).map(x=>x.slice(1)).filter(Boolean);
+    return ignored.length ? `\nKolom diabaikan (nama tidak dikenal): ${ignored.join(", ")}` : "";
+}
 
 /* ===== Impor CSV Data Anggota BEM ===== */
 const DIVISI_LIST = ["Ketua","Sekretaris","Bendahara","Pendidikan","Kesma Faspel","Ibadah","Perkebunan","Medinfo","Humas"];
@@ -2689,8 +2717,8 @@ function impCSVAnggota(ev){
     f.text().then(t=>{
         const rows=parseCSV(t);
         if(!rows.length){ alert("File CSV kosong."); return; }
-        const h=rows.shift().map(x=>x.trim().toLowerCase()), ix=k=>h.indexOf(k);
-        if(ix("nama")<0){ alert('Kolom "nama" tidak ditemukan. Unduh template CSV dulu.'); return; }
+        const h=rows.shift().map(canonHeader), ix=k=>h.indexOf(k);
+        if(ix("nama")<0){ alert('Kolom "nama" tidak ditemukan. Judul kolom harus berada di baris pertama. Unduh template CSV dulu.'); return; }
         const add=[]; let dup=0, divisiBaru=0;
         rows.forEach(r=>{
             const g=k=>ix(k)>=0?(r[ix(k)]||"").trim():"";
@@ -2700,11 +2728,12 @@ function impCSVAnggota(ev){
             let divisi=g("divisi");
             const cocok=DIVISI_LIST.find(d=>d.toLowerCase()===divisi.toLowerCase());
             if(cocok) divisi=cocok; else if(divisi) divisiBaru++;
-            add.push({id:generateId(),nama,nim,divisi,jabatan:g("jabatan"),prodi:g("prodi"),semester:g("semester"),wa:g("wa"),
+            add.push({id:generateId(),nama,nim,divisi,jabatan:g("jabatan"),prodi:g("prodi"),semester:g("semester"),wa:normWa(g("wa")),
                       status:g("status").toLowerCase()==="tidak aktif"?"Tidak Aktif":"Aktif"});
         });
         if(!add.length){ alert("Tidak ada anggota baru. Dilewati (sudah ada): "+dup); return; }
         let msg=`Impor ${add.length} anggota baru? (${dup} dilewati karena sudah ada)`;
+        msg+=headerReport(h);
         if(divisiBaru) msg+=`\n${divisiBaru} baris memakai divisi di luar daftar standar; ditulis apa adanya.`;
         if(confirm(msg)){ db.anggota.push(...add); saveDB(); showToast(add.length+" anggota diimpor."); }
     });
