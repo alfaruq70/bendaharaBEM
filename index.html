@@ -292,29 +292,10 @@ html.dark{filter:invert(1) hue-rotate(180deg);background:#fff}html.dark img,html
         <div class="card success"><small>Total Pemasukan</small><h3 id="dashboardPemasukan">Rp 0</h3></div>
         <div class="card danger"><small>Total Pengeluaran</small><h3 id="dashboardPengeluaran">Rp 0</h3></div>
         <div class="card warning"><small>Total Tunggakan</small><h3 id="dashboardTunggakan">Rp 0</h3></div>
-        <div class="card primary"><small>Jumlah Mahasiswa</small><h3 id="dashboardMahasiswa">0</h3></div>
-        <div class="card success"><small>Sudah Bayar Kas (bulan ini)</small><h3 id="dashboardLunas">0</h3></div>
-        <div class="card danger"><small>Belum Bayar Kas (bulan ini)</small><h3 id="dashboardBelum">0</h3></div>
+        <div class="card primary"><small>Jumlah Anggota BEM</small><h3 id="dashboardMahasiswa">0</h3></div>
+        <div class="card success"><small>Anggota Sudah Bayar Kas (bulan ini)</small><h3 id="dashboardLunas">0</h3></div>
+        <div class="card danger"><small>Anggota Belum Bayar Kas (bulan ini)</small><h3 id="dashboardBelum">0</h3></div>
         <div class="card warning"><small>Total Transaksi</small><h3 id="dashboardTransaksi">0</h3></div>
-    </div>
-
-    <div class="panel" id="reminderPanel">
-        <div class="panel-header">
-            <h3>🔔 Pengingat Kas: Mahasiswa Telat Bayar</h3>
-            <span class="badge badge-danger" id="lateBadge">0</span>
-        </div>
-        <p class="hint" id="lateSummary" style="margin:0 0 12px"></p>
-        <div class="table-wrapper table-scroll" style="max-height:340px">
-            <table style="min-width:600px">
-                <thead>
-                    <tr>
-                        <th>No</th><th>Nama</th><th>Prodi / Smt</th><th>Bulan Telat</th>
-                        <th>Kurang Bayar</th><th class="admin-only">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody id="lateTable"></tbody>
-            </table>
-        </div>
     </div>
 
     <div class="grid-2">
@@ -344,13 +325,37 @@ html.dark{filter:invert(1) hue-rotate(180deg);background:#fff}html.dark img,html
             <div class="form-group"><label for="kasMulai">Mulai ditagih (bulan)</label><input type="month" id="kasMulai"></div>
         </div>
         <div class="toolbar" style="margin:12px 0 0"><button class="btn btn-primary" onclick="saveKasWajib()">Simpan Pengaturan</button></div>
-        <p class="hint">Mahasiswa aktif yang belum lunas setelah jatuh tempo dianggap telat dan muncul di pengingat dashboard. Kosongkan "Mulai ditagih" untuk hanya menghitung bulan berjalan.</p>
+        <p class="hint">Anggota BEM aktif yang belum lunas setelah jatuh tempo dianggap telat dan muncul di pengingat pada halaman ini. Kosongkan "Mulai ditagih" untuk hanya menghitung bulan berjalan.</p>
+    </div>
+
+    <div class="panel" id="reminderPanel">
+        <div class="panel-header">
+            <h3>🔔 Pengingat Kas: Anggota BEM Telat Bayar</h3>
+            <span class="badge badge-danger" id="lateBadge">0</span>
+        </div>
+        <p class="hint" id="lateSummary" style="margin:0 0 12px"></p>
+        <div class="table-wrapper table-scroll" style="max-height:340px">
+            <table style="min-width:600px">
+                <thead>
+                    <tr>
+                        <th>No</th><th>Nama</th><th>Divisi / Jabatan</th><th>Bulan Telat</th>
+                        <th>Kurang Bayar</th><th class="admin-only">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="lateTable"></tbody>
+            </table>
+        </div>
     </div>
 
     <div class="panel">
         <div class="panel-header">
             <h3>Daftar Anggota</h3>
-            <button class="btn btn-primary admin-only" onclick="openAnggotaModal()">+ Tambah Anggota</button>
+            <div class="admin-only" style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="btn btn-light" onclick="tplCSVAnggota()">⇩ Template CSV</button>
+                <button class="btn btn-light" onclick="$('csvAnggotaIn').click()">⇧ Impor CSV</button>
+                <input type="file" id="csvAnggotaIn" accept=".csv,text/csv" hidden onchange="impCSVAnggota(event)">
+                <button class="btn btn-primary" onclick="openAnggotaModal()">+ Tambah Anggota</button>
+            </div>
         </div>
 
         <div class="toolbar">
@@ -368,7 +373,7 @@ html.dark{filter:invert(1) hue-rotate(180deg);background:#fff}html.dark img,html
                 <thead>
                     <tr>
                         <th>No</th><th>Nama</th><th>NIM</th><th>Divisi</th>
-                        <th>Jabatan</th><th>Prodi</th><th class="admin-only">Aksi</th>
+                        <th>Jabatan</th><th>Prodi</th><th>WhatsApp</th><th>Status</th><th class="admin-only">Aksi</th>
                     </tr>
                 </thead>
                 <tbody id="anggotaTable"></tbody>
@@ -381,7 +386,7 @@ html.dark{filter:invert(1) hue-rotate(180deg);background:#fff}html.dark img,html
 <section class="page" id="page-mahasiswa">
     <div class="page-title">
         <h2>Data Seluruh Mahasiswa</h2>
-        <p>Database seluruh mahasiswa. Data ini menjadi dasar pembayaran kas.</p>
+        <p>Database seluruh mahasiswa.</p>
     </div>
 
     <div class="panel">
@@ -458,17 +463,17 @@ html.dark{filter:invert(1) hue-rotate(180deg);background:#fff}html.dark img,html
 <section class="page" id="page-pembayaran">
     <div class="page-title">
         <h2>Pembayaran Kas</h2>
-        <p>Monitoring pembayaran uang kas seluruh mahasiswa.</p>
+        <p>Monitoring pembayaran uang kas anggota BEM.</p>
     </div>
 
     <div class="cards">
         <div class="card success"><small>Kas Terkumpul</small><h3 id="totalKasBayar">Rp 0</h3></div>
         <div class="card danger"><small>Total Tunggakan</small><h3 id="totalTunggakan">Rp 0</h3></div>
-        <div class="card primary"><small>Mahasiswa Lunas (bulan ini)</small><h3 id="totalLunasBulanIni">0</h3></div>
+        <div class="card primary"><small>Anggota Lunas (bulan ini)</small><h3 id="totalLunasBulanIni">0</h3></div>
         <div class="card warning"><small>Belum Lunas (bulan ini)</small><h3 id="totalBelumBulanIni">0</h3></div>
     </div>
 
-    <p class="hint admin-only" style="margin:-8px 0 16px">⚙️ Nominal kas wajib, jatuh tempo, dan bulan mulai ditagih diatur di menu <a href="#" onclick="showPage('anggota',document.querySelectorAll('.nav-btn')[1]);return false">Data Anggota BEM</a>.</p>
+    <p class="hint admin-only" style="margin:-8px 0 16px">⚙️ Nominal kas wajib, jatuh tempo, dan pengingat tunggakan ada di menu <a href="#" onclick="showPage('anggota',document.querySelectorAll('.nav-btn')[1]);return false">Data Anggota BEM</a>.</p>
 
     <div class="panel">
         <div class="panel-header">
@@ -477,7 +482,7 @@ html.dark{filter:invert(1) hue-rotate(180deg);background:#fff}html.dark img,html
         </div>
 
         <div class="toolbar">
-            <input type="text" id="searchPembayaran" placeholder="Cari nama mahasiswa..." oninput="renderPembayaran()">
+            <input type="text" id="searchPembayaran" placeholder="Cari nama anggota..." oninput="renderPembayaran()">
             <select id="filterBayarBulan" onchange="renderPembayaran()"></select>
             <select id="filterBayarStatus" onchange="renderPembayaran()">
                 <option value="">Semua Status</option>
@@ -491,7 +496,7 @@ html.dark{filter:invert(1) hue-rotate(180deg);background:#fff}html.dark img,html
             <table>
                 <thead>
                     <tr>
-                        <th>Nama</th><th>Prodi / Smt</th><th>Bulan</th><th>Nominal Wajib</th>
+                        <th>Nama</th><th>Divisi / Jabatan</th><th>Bulan</th><th>Nominal Wajib</th>
                         <th>Dibayar</th><th>Tunggakan</th><th>Status</th><th class="admin-only">Aksi</th>
                     </tr>
                 </thead>
@@ -653,7 +658,7 @@ html.dark{filter:invert(1) hue-rotate(180deg);background:#fff}html.dark img,html
         <div class="card primary"><small>Jumlah Transaksi</small><h3 id="evaluasiTransaksi">0</h3></div>
         <div class="card success"><small>Rasio Pemasukan</small><h3 id="evaluasiPemasukan">0%</h3></div>
         <div class="card danger"><small>Rasio Pengeluaran</small><h3 id="evaluasiPengeluaran">0%</h3></div>
-        <div class="card warning"><small>Kepatuhan Kas Mahasiswa</small><h3 id="evaluasiKas">0%</h3></div>
+        <div class="card warning"><small>Kepatuhan Kas Anggota</small><h3 id="evaluasiKas">0%</h3></div>
     </div>
 
     <div class="panel">
@@ -723,6 +728,10 @@ html.dark{filter:invert(1) hue-rotate(180deg);background:#fff}html.dark img,html
             <div class="form-group"><label>Program Studi</label><input id="anggotaProdi"></div>
             <div class="form-group"><label>Semester</label><input id="anggotaSemester" type="number"></div>
             <div class="form-group"><label>WhatsApp</label><input id="anggotaWa"></div>
+            <div class="form-group">
+                <label>Status (ditagih kas jika Aktif)</label>
+                <select id="anggotaStatus"><option>Aktif</option><option>Tidak Aktif</option></select>
+            </div>
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-light" onclick="closeModal('anggotaModal')">Batal</button>
@@ -811,8 +820,8 @@ html.dark{filter:invert(1) hue-rotate(180deg);background:#fff}html.dark img,html
     <form id="pembayaranForm">
         <div class="form-grid">
             <div class="form-group full">
-                <label>Mahasiswa *</label>
-                <select id="bayarMahasiswa" required><option value="">Pilih mahasiswa</option></select>
+                <label>Anggota BEM *</label>
+                <select id="bayarMahasiswa" required><option value="">Pilih anggota</option></select>
             </div>
             <div class="form-group">
                 <label>Bulan</label>
@@ -942,7 +951,7 @@ html.dark{filter:invert(1) hue-rotate(180deg);background:#fff}html.dark img,html
         </div>
         <ul class="fr-list" id="frList"></ul>
         <div class="fr-foot">
-            <button class="btn btn-sm btn-primary" onclick="goToReminder()">Lihat di Dashboard</button>
+            <button class="btn btn-sm btn-primary" onclick="goToReminder()">Lihat di Data Anggota</button>
             <button class="btn btn-sm btn-light" onclick="minimizeReminder()">Nanti diingatkan lagi</button>
         </div>
     </div>
@@ -1299,7 +1308,7 @@ function calculateArrears(){
     db.pembayaran.forEach(p=>{
         const mi = BULAN.indexOf(p.bulan);
         if(mi<0) return;
-        const key = (p.mahasiswaId||p.anggotaId)+"|"+(Number(p.tahun)*12+mi);
+        const key = (p.anggotaId||p.mahasiswaId)+"|"+(Number(p.tahun)*12+mi);
         const t = paid[key] || (paid[key]={dibayar:0,wajib:0});
         t.dibayar += Number(p.dibayar)||0;
         t.wajib = Math.max(t.wajib,Number(p.wajib)||0);
@@ -1307,7 +1316,7 @@ function calculateArrears(){
 
     const list = [];
     let total = 0;
-    db.mahasiswa.filter(m=>m.status!=="Tidak Aktif").forEach(m=>{
+    db.anggota.filter(m=>m.status!=="Tidak Aktif").forEach(m=>{
         const bulan = [];
         let kurangTotal = 0;
         for(let idx=startIdx; idx<=curIdx; idx++){
@@ -1343,17 +1352,17 @@ function renderReminder(){
     $("lateBadge").textContent = a.list.length;
 
     if(!a.ready){
-        $("lateSummary").textContent = "Nominal kas wajib belum diatur, pengingat belum dapat dihitung. Admin dapat mengaturnya di menu Pembayaran Kas.";
+        $("lateSummary").textContent = "Nominal kas wajib belum diatur, pengingat belum dapat dihitung. Admin dapat mengaturnya di panel Pengaturan Kas Wajib di atas.";
         tbody.innerHTML = emptyRow(6,"Belum ada pengaturan kas wajib.");
         return;
     }
     const due = db.settings.jatuhTempo || 10;
     if(!a.list.length){
         $("lateSummary").textContent = `Jatuh tempo setiap tanggal ${due}.`;
-        tbody.innerHTML = emptyRow(6,"✅ Tidak ada mahasiswa yang telat bayar kas.");
+        tbody.innerHTML = emptyRow(6,"✅ Tidak ada anggota yang telat bayar kas.");
         return;
     }
-    $("lateSummary").textContent = `${a.list.length} mahasiswa telat bayar dengan total kurang ${rupiah(a.total)}. Jatuh tempo setiap tanggal ${due}.`;
+    $("lateSummary").textContent = `${a.list.length} anggota telat bayar dengan total kurang ${rupiah(a.total)}. Jatuh tempo setiap tanggal ${due}.`;
     tbody.innerHTML = a.list.map((x,i)=>{
         const link = waLink(x.m,x);
         const aksi = link
@@ -1363,7 +1372,7 @@ function renderReminder(){
         <tr>
             <td>${i+1}</td>
             <td><strong>${escapeHTML(x.m.nama)}</strong></td>
-            <td>${escapeHTML(x.m.prodi)} / ${escapeHTML(x.m.semester)}</td>
+            <td>${escapeHTML(x.m.divisi||"-")} / ${escapeHTML(x.m.jabatan||"-")}</td>
             <td>${escapeHTML(x.bulan.join(", "))} <span class="badge badge-warning">${x.bulan.length} bln</span></td>
             <td><strong>${rupiah(x.total)}</strong></td>
             <td class="admin-only">${aksi}</td>
@@ -1384,14 +1393,14 @@ function calculatePayment(){
     const paid = {};
     db.pembayaran.forEach(p=>{
         if(p.bulan===bulan && String(p.tahun)===tahun){
-            const key = p.mahasiswaId || p.anggotaId;
+            const key = p.anggotaId || p.mahasiswaId;
             const t = paid[key] || (paid[key]={wajib:0,dibayar:0});
             t.wajib += Number(p.wajib)||0;
             t.dibayar += Number(p.dibayar)||0;
         }
     });
     const lunas = Object.values(paid).filter(t=>t.wajib>0 && t.dibayar>=t.wajib).length;
-    const totalAktif = db.mahasiswa.filter(m=>m.status!=="Tidak Aktif").length;
+    const totalAktif = db.anggota.filter(m=>m.status!=="Tidak Aktif").length;
     const arrears = calculateArrears();
     if(arrears.ready) tunggakan = arrears.total;
     return { dibayar, tunggakan, lunas, belum:Math.max(totalAktif-lunas,0), totalAktif };
@@ -1408,7 +1417,7 @@ function updateDashboard(){
     $("dashboardPemasukan").textContent = rupiah(f.pemasukan);
     $("dashboardPengeluaran").textContent = rupiah(f.pengeluaran);
     $("dashboardTunggakan").textContent = rupiah(p.tunggakan);
-    $("dashboardMahasiswa").textContent = db.mahasiswa.length;
+    $("dashboardMahasiswa").textContent = db.anggota.length;
     $("dashboardLunas").textContent = p.lunas;
     $("dashboardBelum").textContent = p.belum;
     $("dashboardTransaksi").textContent = db.kas.length;
@@ -1474,7 +1483,8 @@ $("anggotaForm").addEventListener("submit",function(e){
         jabatan: $("anggotaJabatan").value,
         prodi: $("anggotaProdi").value,
         semester: $("anggotaSemester").value,
-        wa: $("anggotaWa").value
+        wa: $("anggotaWa").value.trim(),
+        status: $("anggotaStatus").value
     };
     if(db.anggota.some(a=>a.nim===data.nim && a.id!==id)){
         alert("NIM sudah terdaftar."); return;
@@ -1482,6 +1492,7 @@ $("anggotaForm").addEventListener("submit",function(e){
     if(id){
         const i = db.anggota.findIndex(a=>a.id===id);
         db.anggota[i] = data;
+        db.pembayaran.forEach(p=>{ if((p.anggotaId||p.mahasiswaId)===id){ p.nama=data.nama; p.divisi=data.divisi; p.jabatan=data.jabatan; } });
     }else{
         db.anggota.push(data);
     }
@@ -1494,7 +1505,7 @@ function renderAnggota(){
     const search = $("searchAnggota").value.toLowerCase();
     const divisi = $("filterDivisi").value;
     const data = db.anggota.filter(a=>
-        (a.nama.toLowerCase().includes(search) || a.nim.toLowerCase().includes(search)) &&
+        (a.nama.toLowerCase().includes(search) || (a.nim||"").toLowerCase().includes(search)) &&
         (!divisi || a.divisi===divisi)
     );
     $("anggotaTable").innerHTML = data.length ? data.map((a,i)=>`
@@ -1505,11 +1516,13 @@ function renderAnggota(){
             <td>${escapeHTML(a.divisi)}</td>
             <td>${escapeHTML(a.jabatan)}</td>
             <td>${escapeHTML(a.prodi)}</td>
+            <td>${escapeHTML(a.wa||"-")}</td>
+            <td><span class="badge ${a.status==="Tidak Aktif"?"badge-danger":"badge-success"}">${escapeHTML(a.status||"Aktif")}</span></td>
             <td class="admin-only"><div class="actions">
                 <button class="btn btn-sm btn-warning" onclick="editAnggota('${a.id}')">Edit</button>
                 <button class="btn btn-sm btn-danger" onclick="deleteAnggota('${a.id}')">Hapus</button>
             </div></td>
-        </tr>`).join("") : emptyRow(7,"Belum ada data anggota.");
+        </tr>`).join("") : emptyRow(9,"Belum ada data anggota.");
 }
 
 function editAnggota(id){
@@ -1519,11 +1532,15 @@ function editAnggota(id){
     $("anggotaId").value = a.id;
     $("anggotaNama").value = a.nama;
     $("anggotaNim").value = a.nim;
+    if(a.divisi && ![...$("anggotaDivisi").options].some(o=>o.value===a.divisi)){
+        $("anggotaDivisi").add(new Option(a.divisi,a.divisi));   // divisi dari CSV di luar daftar standar
+    }
     $("anggotaDivisi").value = a.divisi;
     $("anggotaJabatan").value = a.jabatan;
     $("anggotaProdi").value = a.prodi;
     $("anggotaSemester").value = a.semester;
-    $("anggotaWa").value = a.wa;
+    $("anggotaWa").value = a.wa||"";
+    $("anggotaStatus").value = a.status||"Aktif";
     $("anggotaModalTitle").textContent = "Edit Anggota";
     openModal("anggotaModal");
 }
@@ -1566,10 +1583,6 @@ $("mahasiswaForm").addEventListener("submit",function(e){
     if(id){
         const i = db.mahasiswa.findIndex(m=>m.id===id);
         db.mahasiswa[i] = data;
-        // sinkronkan nama pada riwayat pembayaran
-        db.pembayaran.forEach(p=>{
-            if((p.mahasiswaId||p.anggotaId)===id){ p.nama=data.nama; p.prodi=data.prodi; p.semester=data.semester; }
-        });
     }else{
         db.mahasiswa.push(data);
     }
@@ -1632,7 +1645,7 @@ function editMahasiswa(id){
 
 function deleteMahasiswa(id){
     if(!requireAdmin()) return;
-    if(!confirm("Hapus mahasiswa ini? Riwayat pembayarannya tetap tersimpan.")) return;
+    if(!confirm("Hapus mahasiswa ini?")) return;
     db.mahasiswa = db.mahasiswa.filter(m=>m.id!==id);
     saveDB();
     showToast("Data mahasiswa dihapus.");
@@ -1733,11 +1746,11 @@ function openPembayaranModal(){
     if(!requireAdmin()) return;
     $("pembayaranForm").reset();
 
-    const list = [...db.mahasiswa]
+    const list = [...db.anggota]
         .filter(m=>m.status!=="Tidak Aktif")
         .sort((a,b)=>a.nama.localeCompare(b.nama));
-    $("bayarMahasiswa").innerHTML = `<option value="">Pilih mahasiswa</option>` +
-        list.map(m=>`<option value="${m.id}">${escapeHTML(m.nama)} — ${escapeHTML(m.prodi)} / Smt ${escapeHTML(m.semester)}</option>`).join("");
+    $("bayarMahasiswa").innerHTML = `<option value="">Pilih anggota</option>` +
+        list.map(m=>`<option value="${m.id}">${escapeHTML(m.nama)} — ${escapeHTML(m.divisi||"-")}${m.jabatan?" / "+escapeHTML(m.jabatan):""}</option>`).join("");
 
     const now = new Date();
     $("bayarBulan").value = BULAN[now.getMonth()];
@@ -1750,8 +1763,8 @@ function openPembayaranModal(){
 $("pembayaranForm").addEventListener("submit",function(e){
     e.preventDefault();
     if(!requireAdmin()) return;
-    const mhs = db.mahasiswa.find(m=>m.id===$("bayarMahasiswa").value);
-    if(!mhs){ alert("Pilih mahasiswa."); return; }
+    const mhs = db.anggota.find(m=>m.id===$("bayarMahasiswa").value);
+    if(!mhs){ alert("Pilih anggota."); return; }
 
     const wajib = Number($("bayarWajib").value)||0;
     const dibayar = Number($("bayarNominal").value)||0;
@@ -1759,10 +1772,10 @@ $("pembayaranForm").addEventListener("submit",function(e){
 
     db.pembayaran.push({
         id: generateId(),
-        mahasiswaId: mhs.id,
+        anggotaId: mhs.id,
         nama: mhs.nama,
-        prodi: mhs.prodi,
-        semester: mhs.semester,
+        divisi: mhs.divisi,
+        jabatan: mhs.jabatan,
         bulan: $("bayarBulan").value,
         tahun: $("bayarTahun").value,
         wajib, dibayar,
@@ -1788,7 +1801,7 @@ function renderPembayaran(){
     $("pembayaranTable").innerHTML = data.length ? data.map(p=>{
         const sisa = Math.max((Number(p.wajib)||0)-(Number(p.dibayar)||0),0);
         const s = statusBayar(p);
-        const info = p.prodi ? `${escapeHTML(p.prodi)} / ${escapeHTML(p.semester)}` : "-";
+        const info = p.divisi ? `${escapeHTML(p.divisi)}${p.jabatan?" / "+escapeHTML(p.jabatan):""}` : "-";
         return `
         <tr>
             <td><strong>${escapeHTML(p.nama)}</strong></td>
@@ -1975,8 +1988,8 @@ function renderEvaluasi(){
         <p style="margin-bottom:10px;"><strong>Saldo saat ini:</strong> ${rupiah(f.saldo)}</p>
         <p style="margin-bottom:10px;"><strong>Total pemasukan:</strong> ${rupiah(f.pemasukan)}</p>
         <p style="margin-bottom:10px;"><strong>Total pengeluaran:</strong> ${rupiah(f.pengeluaran)}</p>
-        <p style="margin-bottom:10px;"><strong>Total tunggakan kas mahasiswa:</strong> ${rupiah(p.tunggakan)}</p>
-        <p><strong>Kepatuhan pembayaran kas bulan ini:</strong> ${p.lunas} dari ${p.totalAktif} mahasiswa aktif (${kepatuhan}%)</p>`;
+        <p style="margin-bottom:10px;"><strong>Total tunggakan kas anggota:</strong> ${rupiah(p.tunggakan)}</p>
+        <p><strong>Kepatuhan pembayaran kas bulan ini:</strong> ${p.lunas} dari ${p.totalAktif} anggota BEM aktif (${kepatuhan}%)</p>`;
 }
 
 /* ============================================================
@@ -2364,7 +2377,7 @@ function calculateUnpaid(){
     db.pembayaran.forEach(p=>{
         const mi = BULAN.indexOf(p.bulan);
         if(mi<0) return;
-        const key = (p.mahasiswaId||p.anggotaId)+"|"+(Number(p.tahun)*12+mi);
+        const key = (p.anggotaId||p.mahasiswaId)+"|"+(Number(p.tahun)*12+mi);
         const t = paid[key] || (paid[key]={dibayar:0,wajib:0});
         t.dibayar += Number(p.dibayar)||0;
         t.wajib = Math.max(t.wajib,Number(p.wajib)||0);
@@ -2372,7 +2385,7 @@ function calculateUnpaid(){
 
     const list = [];
     let total = 0, telat = 0;
-    db.mahasiswa.filter(m=>m.status!=="Tidak Aktif").forEach(m=>{
+    db.anggota.filter(m=>m.status!=="Tidak Aktif").forEach(m=>{
         const bulan = []; let kurangTotal = 0, isLate = false;
         for(let idx=startIdx; idx<=curIdx; idx++){
             const rec = paid[m.id+"|"+idx] || {dibayar:0,wajib:0};
@@ -2407,7 +2420,7 @@ function renderFloatingReminder(){
         return;
     }
 
-    $("frTitle").textContent = `${n} mahasiswa belum bayar kas`;
+    $("frTitle").textContent = `${n} anggota BEM belum bayar kas`;
     $("frSub").textContent = `Total kurang ${rupiah(u.total)}` + (u.telat ? ` • ${u.telat} sudah lewat jatuh tempo` : "");
     $("frPillText").textContent = `${n} belum bayar kas`;
     $("frList").innerHTML = u.list.slice(0,8).map(x=>{
@@ -2418,7 +2431,7 @@ function renderFloatingReminder(){
             <span class="fr-sub">${escapeHTML(x.bulan.join(", "))} • ${rupiah(x.total)} ${x.late?'<span class="badge badge-danger">telat</span>':'<span class="badge badge-warning">belum bayar</span>'}</span></div>
             ${wa}
         </li>`;
-    }).join("") + (n>8 ? `<li><span class="fr-sub">+ ${n-8} mahasiswa lainnya di dashboard</span></li>` : "");
+    }).join("") + (n>8 ? `<li><span class="fr-sub">+ ${n-8} anggota lainnya di Data Anggota BEM</span></li>` : "");
 
     // pertahankan keadaan terbuka/tertutup antar pembaruan data
     card.classList.toggle("show",remindOpen);
@@ -2429,7 +2442,7 @@ function openReminder(){ remindOpen = true; renderFloatingReminder(); }
 function minimizeReminder(){ remindOpen = false; renderFloatingReminder(); }
 function goToReminder(){
     minimizeReminder();
-    showPage("dashboard",document.querySelector(".nav-btn"));
+    showPage("anggota",document.querySelectorAll(".nav-btn")[1]);
     const el = $("reminderPanel"); if(el) el.scrollIntoView({behavior:"smooth",block:"start"});
 }
 
@@ -2614,14 +2627,14 @@ function renderBayar(){
     const P=db.settings.pay||{};
     $("payInfo").innerHTML=(P.qris?`<img src="${P.qris}" style="display:block;max-width:260px;width:100%;margin:0 auto 12px;border-radius:12px">`:'<p class="hint">QRIS belum diatur.</p>')+(P.rek||[]).map(r=>`<div style="padding:8px 0;border-top:1px solid var(--border)"><b>${escapeHTML(r.bank)}</b> ${escapeHTML(r.no)}<br><small>a.n. ${escapeHTML(r.an)}</small></div>`).join("");
     if(document.activeElement!==$("payRek")) $("payRek").value=(P.rek||[]).map(r=>[r.bank,r.no,r.an].join("|")).join("\n");
-    const cur=$("pbMhs").value; $("pbMhs").innerHTML='<option value="">Pilih nama</option>'+db.mahasiswa.filter(x=>x.status!=="Tidak Aktif").sort((a,b)=>a.nama.localeCompare(b.nama)).map(x=>`<option value="${x.id}">${escapeHTML(x.nama)}</option>`).join(""); $("pbMhs").value=cur;
+    const cur=$("pbMhs").value; $("pbMhs").innerHTML='<option value="">Pilih nama anggota</option>'+db.anggota.filter(x=>x.status!=="Tidak Aktif").sort((a,b)=>a.nama.localeCompare(b.nama)).map(x=>`<option value="${x.id}">${escapeHTML(x.nama)}</option>`).join(""); $("pbMhs").value=cur;
     if(!$("pbBulan").options.length){ $("pbBulan").innerHTML=BULAN.map(b=>`<option>${b}</option>`).join(""); $("pbBulan").value=BULAN[new Date().getMonth()]; $("pbNom").value=db.settings.kasWajib||""; }
 }
 function kirimBukti(){
     const mid=$("pbMhs").value, f=$("pbFile").files[0], nom=Number($("pbNom").value);
     if(!mid||!nom||!f){ alert("Pilih nama, isi nominal, dan lampirkan foto bukti."); return; }
     shrinkImg(f,async img=>{
-        const m=db.mahasiswa.find(x=>x.id===mid), rec={mahasiswaId:mid,nama:m.nama,bulan:$("pbBulan").value,tahun:String(new Date().getFullYear()),nominal:nom,metode:$("pbMet").value,tanggal:today(),bukti:img};
+        const m=db.anggota.find(x=>x.id===mid), rec={anggotaId:mid,nama:m.nama,bulan:$("pbBulan").value,tahun:String(new Date().getFullYear()),nominal:nom,metode:$("pbMet").value,tanggal:today(),bukti:img};
         const {error}=await sb.from("bukti_bayar").insert({id:generateId(),data:rec});
         if(error){ alert("Gagal mengirim: "+error.message+"\n(Pastikan tabel bukti_bayar sudah dibuat di Supabase.)"); return; }
         $("pbFile").value=""; showToast("Bukti terkirim. Menunggu konfirmasi bendahara.");
@@ -2636,9 +2649,9 @@ async function loadPending(){
 }
 function showBukti(id){ const p=PEND.find(x=>x.id===id); if(!p) return; const o=document.createElement("div"); o.style.cssText="position:fixed;inset:0;background:#000b;z-index:9999;display:grid;place-items:center;padding:16px"; o.innerHTML=`<img src="${p.bukti}" style="max-width:100%;max-height:92vh;border-radius:10px">`; o.onclick=()=>o.remove(); document.body.appendChild(o); }
 async function terimaBukti(id){
-    const p=PEND.find(x=>x.id===id), m=p&&db.mahasiswa.find(x=>x.id===p.mahasiswaId); if(!p) return;
-    if(!m){ alert("Mahasiswa tidak ditemukan di database."); return; }
-    db.pembayaran.push({id:generateId(),mahasiswaId:m.id,nama:m.nama,prodi:m.prodi,semester:m.semester,bulan:p.bulan,tahun:p.tahun,wajib:Number(db.settings.kasWajib)||p.nominal,dibayar:p.nominal,tanggal:today(),metode:p.metode});
+    const p=PEND.find(x=>x.id===id), m=p&&db.anggota.find(x=>x.id===(p.anggotaId||p.mahasiswaId)); if(!p) return;
+    if(!m){ alert("Anggota tidak ditemukan di Data Anggota BEM."); return; }
+    db.pembayaran.push({id:generateId(),anggotaId:m.id,nama:m.nama,divisi:m.divisi,jabatan:m.jabatan,bulan:p.bulan,tahun:p.tahun,wajib:Number(db.settings.kasWajib)||p.nominal,dibayar:p.nominal,tanggal:today(),metode:p.metode});
     saveDB(); await sb.from("bukti_bayar").delete().eq("id",id); showToast("Pembayaran diterima & dicatat."); loadPending();
 }
 async function tolakBukti(id){ if(!confirm("Tolak bukti ini?")) return; await sb.from("bukti_bayar").delete().eq("id",id); loadPending(); }
@@ -2661,6 +2674,41 @@ function tplCSV(){ const a=document.createElement("a"); a.href=URL.createObjectU
     w.innerHTML='<button class="btn btn-light" onclick="tplCSV()">⇩ Template CSV</button> <button class="btn btn-light" onclick="$(\'csvIn\').click()">⇧ Impor CSV</button><input type="file" id="csvIn" accept=".csv,text/csv" hidden onchange="impCSV(event)">'; h.appendChild(w); })();
 const _showPage=showPage; showPage=function(p,b){ _showPage(p,b); if(p==="konfirmasi") loadPending(); };
 const _updateAll2=updateAll; updateAll=function(){ _updateAll2(); renderKalender(); renderBayar(); };
+
+
+/* ===== Impor CSV Data Anggota BEM ===== */
+const DIVISI_LIST = ["Ketua","Sekretaris","Bendahara","Pendidikan","Kesma Faspel","Ibadah","Perkebunan","Medinfo","Humas"];
+function tplCSVAnggota(){
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(new Blob(["\uFEFFnama,nim,divisi,jabatan,prodi,semester,wa,status\nContoh Nama,2501031001,Bendahara,Bendahara BEM,IAT,3,081234567890,Aktif\n"],{type:"text/csv"}));
+    a.download="template-anggota-bem.csv"; a.click(); URL.revokeObjectURL(a.href);
+}
+function impCSVAnggota(ev){
+    if(!requireAdmin()) return;
+    const f=ev.target.files[0]; ev.target.value=""; if(!f) return;
+    f.text().then(t=>{
+        const rows=parseCSV(t);
+        if(!rows.length){ alert("File CSV kosong."); return; }
+        const h=rows.shift().map(x=>x.trim().toLowerCase()), ix=k=>h.indexOf(k);
+        if(ix("nama")<0){ alert('Kolom "nama" tidak ditemukan. Unduh template CSV dulu.'); return; }
+        const add=[]; let dup=0, divisiBaru=0;
+        rows.forEach(r=>{
+            const g=k=>ix(k)>=0?(r[ix(k)]||"").trim():"";
+            const nama=g("nama"), nim=g("nim");
+            if(!nama) return;
+            if([...db.anggota,...add].some(x=>(nim&&x.nim===nim)||(x.nama||"").toLowerCase()===nama.toLowerCase())){ dup++; return; }
+            let divisi=g("divisi");
+            const cocok=DIVISI_LIST.find(d=>d.toLowerCase()===divisi.toLowerCase());
+            if(cocok) divisi=cocok; else if(divisi) divisiBaru++;
+            add.push({id:generateId(),nama,nim,divisi,jabatan:g("jabatan"),prodi:g("prodi"),semester:g("semester"),wa:g("wa"),
+                      status:g("status").toLowerCase()==="tidak aktif"?"Tidak Aktif":"Aktif"});
+        });
+        if(!add.length){ alert("Tidak ada anggota baru. Dilewati (sudah ada): "+dup); return; }
+        let msg=`Impor ${add.length} anggota baru? (${dup} dilewati karena sudah ada)`;
+        if(divisiBaru) msg+=`\n${divisiBaru} baris memakai divisi di luar daftar standar; ditulis apa adanya.`;
+        if(confirm(msg)){ db.anggota.push(...add); saveDB(); showToast(add.length+" anggota diimpor."); }
+    });
+}
 
 initBulanSelects();
 updateAll();
