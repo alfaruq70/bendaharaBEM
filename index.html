@@ -124,6 +124,7 @@ textarea{min-height:90px;resize:vertical}
 
 .topbar-right{display:flex;align-items:center;gap:12px}
 @media(max-width:768px){
+    .toolbar select,.toolbar input[type=text],.toolbar input[type=number],.toolbar input[type=search],.toolbar input:not([type]){width:100%;max-width:none}
     .topbar{height:auto;min-height:60px;padding:8px 12px;gap:8px}
     .topbar-right{flex-wrap:wrap;justify-content:flex-end;gap:6px}
     .topbar-info span{display:none}
@@ -177,6 +178,7 @@ body.viewer .admin-only{display:none!important}
 
 /* Mode gelap & bar kategori */
 html.dark{filter:invert(1) hue-rotate(180deg);background:#fff}html.dark img,html.dark canvas{filter:invert(1) hue-rotate(180deg)}
+html.dark .sidebar{filter:invert(1) hue-rotate(180deg)}   /* sidebar tetap gelap di mode gelap */
 .bar-row{display:grid;grid-template-columns:130px 1fr 110px;gap:10px;align-items:center;font-size:13px;margin:8px 0}.bar-row i{display:block;height:9px;border-radius:9px;background:var(--danger)}
 @media print{
     .sidebar,.topbar,.no-print,.actions,button,.float-remind{display:none!important}
@@ -304,7 +306,7 @@ html.dark{filter:invert(1) hue-rotate(180deg);background:#fff}html.dark img,html
             <div class="chart-box"><canvas id="financeChart"></canvas></div>
         </div>
         <div class="panel">
-            <div class="panel-header"><h3>Status Kas Mahasiswa (bulan ini)</h3></div>
+            <div class="panel-header"><h3>Status Kas Anggota BEM (bulan ini)</h3></div>
             <div class="chart-box"><canvas id="paymentChart"></canvas></div>
         </div>
     </div>
@@ -320,12 +322,12 @@ html.dark{filter:invert(1) hue-rotate(180deg);background:#fff}html.dark img,html
     <div class="panel admin-only">
         <div class="panel-header"><h3>⚙️ Pengaturan Kas Wajib</h3></div>
         <div class="form-grid three">
-            <div class="form-group"><label for="kasWajibDefault">Kas wajib / mahasiswa / bulan</label><input type="number" id="kasWajibDefault" min="0"></div>
+            <div class="form-group"><label for="kasWajibDefault">Kas wajib / anggota / bulan</label><input type="number" id="kasWajibDefault" min="0"></div>
             <div class="form-group"><label for="kasJatuhTempo">Jatuh tempo (tanggal tiap bulan)</label><input type="number" id="kasJatuhTempo" min="1" max="28"></div>
-            <div class="form-group"><label for="kasMulai">Mulai ditagih (bulan)</label><input type="month" id="kasMulai"></div>
+            <div class="form-group"><label for="kasMulai">Mulai ditagih (bulan, umum)</label><input type="month" id="kasMulai"></div>
         </div>
         <div class="toolbar" style="margin:12px 0 0"><button class="btn btn-primary" onclick="saveKasWajib()">Simpan Pengaturan</button></div>
-        <p class="hint">Anggota BEM aktif yang belum lunas setelah jatuh tempo dianggap telat dan muncul di pengingat pada halaman ini. Kosongkan "Mulai ditagih" untuk hanya menghitung bulan berjalan.</p>
+        <p class="hint">Anggota BEM aktif yang belum lunas setelah jatuh tempo dianggap telat dan muncul di pengingat pada halaman ini. Kosongkan "Mulai ditagih" untuk hanya menghitung bulan berjalan; bulan di masa depan berarti belum ditagih. Anggota tertentu bisa punya bulan mulai sendiri lewat tombol Edit.</p>
     </div>
 
     <div class="panel" id="reminderPanel">
@@ -373,7 +375,7 @@ html.dark{filter:invert(1) hue-rotate(180deg);background:#fff}html.dark img,html
                 <thead>
                     <tr>
                         <th>No</th><th>Nama</th><th>NIM</th><th>Divisi</th>
-                        <th>Jabatan</th><th>Prodi</th><th>WhatsApp</th><th>Status</th><th class="admin-only">Aksi</th>
+                        <th>Jabatan</th><th>Prodi</th><th>WhatsApp</th><th>Status</th><th>Mulai Kas</th><th class="admin-only">Aksi</th>
                     </tr>
                 </thead>
                 <tbody id="anggotaTable"></tbody>
@@ -640,11 +642,11 @@ html.dark{filter:invert(1) hue-rotate(180deg);background:#fff}html.dark img,html
 <div class="form-group full"><label>Rekening / e-wallet (satu per baris: Bank|Nomor|Atas nama)</label><textarea id="payRek" rows="3"></textarea></div>
 <button class="btn btn-primary" onclick="saveRek()">Simpan</button></div>
 <div class="panel"><div class="panel-header"><h3>Kirim Bukti Bayar</h3></div>
-<div class="toolbar"><select id="pbMhs"></select><select id="pbBulan"></select><input id="pbNom" type="number" placeholder="Nominal"><select id="pbMet"><option>QRIS</option><option>Transfer</option><option>E-Wallet</option></select></div>
+<div class="toolbar"><select id="pbMhs"></select><select id="pbBulan"></select><select id="pbTahun"></select><input id="pbNom" type="number" placeholder="Nominal"><select id="pbMet"><option>QRIS</option><option>Transfer</option><option>E-Wallet</option></select></div>
 <div class="form-group full"><label>Foto bukti transfer *</label><input type="file" id="pbFile" accept="image/*"></div>
 <button class="btn btn-primary" onclick="kirimBukti()">Kirim bukti</button></div></section>
 
-<section class="page" id="page-konfirmasi"><div class="page-title"><h2>Konfirmasi Bayar</h2><p>Bukti bayar kiriman mahasiswa. Terima akan otomatis mencatat pembayaran.</p></div>
+<section class="page" id="page-konfirmasi"><div class="page-title"><h2>Konfirmasi Bayar</h2><p>Bukti bayar kiriman anggota BEM. Terima akan otomatis mencatat pembayaran.</p></div>
 <div class="panel"><div class="toolbar"><button class="btn btn-light" onclick="loadPending()">⟳ Muat ulang</button></div><div id="pendList"></div></div></section>
 
 <!-- ===== EVALUASI ===== -->
@@ -731,6 +733,11 @@ html.dark{filter:invert(1) hue-rotate(180deg);background:#fff}html.dark img,html
             <div class="form-group">
                 <label>Status (ditagih kas jika Aktif)</label>
                 <select id="anggotaStatus"><option>Aktif</option><option>Tidak Aktif</option></select>
+            </div>
+            <div class="form-group">
+                <label>Mulai bayar kas (opsional)</label>
+                <input id="anggotaMulaiKas" type="month">
+                <small class="hint" style="display:block;margin-top:4px">Kosong = ikut pengaturan umum. Isi bila anggota ini mulai dari bulan lain.</small>
             </div>
         </div>
         <div class="modal-footer">
@@ -1289,6 +1296,20 @@ function statusBayar(p){
     return { text:"LUNAS", badge:"badge-success" };
 }
 
+
+function fmtBulanKas(v){ const [y,m]=String(v).split("-").map(Number); return (y&&m)?BULAN[m-1]+" "+y:v; }
+// Bulan mulai ditagih: pengaturan per anggota (mulaiKas) menggantikan pengaturan umum (settings.kasMulai).
+// Bulan di masa depan = belum ditagih sama sekali. Kosong = hanya bulan berjalan.
+function kasStartIdx(m, curIdx){
+    const v = (m && m.mulaiKas) || db.settings.kasMulai || "";
+    let idx = curIdx;
+    if(v){
+        const [y,mo] = v.split("-").map(Number);
+        if(y && mo) idx = y*12 + (mo-1);
+    }
+    return Math.max(idx, curIdx-119);   // batas aman 10 tahun ke belakang
+}
+
 function calculateArrears(){
     const wajibDefault = Number(db.settings.kasWajib)||0;
     if(wajibDefault<=0) return { ready:false, list:[], total:0 };
@@ -1297,12 +1318,6 @@ function calculateArrears(){
     const now = new Date();
     const curIdx = now.getFullYear()*12 + now.getMonth();
 
-    let startIdx = curIdx;
-    if(db.settings.kasMulai){
-        const [y,m] = db.settings.kasMulai.split("-").map(Number);
-        if(y && m) startIdx = y*12 + (m-1);
-    }
-    startIdx = Math.max(Math.min(startIdx,curIdx),curIdx-35);   // maksimal 36 bulan ke belakang
 
     const paid = {};
     db.pembayaran.forEach(p=>{
@@ -1319,7 +1334,7 @@ function calculateArrears(){
     db.anggota.filter(m=>m.status!=="Tidak Aktif").forEach(m=>{
         const bulan = [];
         let kurangTotal = 0;
-        for(let idx=startIdx; idx<=curIdx; idx++){
+        for(let idx=kasStartIdx(m,curIdx); idx<=curIdx; idx++){
             const overdue = idx<curIdx || now.getDate()>dueDay;
             if(!overdue) continue;
             const rec = paid[m.id+"|"+idx] || {dibayar:0,wajib:0};
@@ -1387,7 +1402,7 @@ function calculatePayment(){
         tunggakan += Math.max((Number(p.wajib)||0)-(Number(p.dibayar)||0),0);
     });
 
-    // Status bulan berjalan: mahasiswa aktif dianggap lunas jika total bayar bulan ini >= wajib
+    // Status bulan berjalan: anggota BEM aktif dianggap lunas jika total bayar bulan ini >= wajib
     const now = new Date();
     const bulan = BULAN[now.getMonth()], tahun = String(now.getFullYear());
     const paid = {};
@@ -1484,7 +1499,8 @@ $("anggotaForm").addEventListener("submit",function(e){
         prodi: $("anggotaProdi").value,
         semester: $("anggotaSemester").value,
         wa: $("anggotaWa").value.trim(),
-        status: $("anggotaStatus").value
+        status: $("anggotaStatus").value,
+        mulaiKas: $("anggotaMulaiKas").value || ""
     };
     if(db.anggota.some(a=>a.nim===data.nim && a.id!==id)){
         alert("NIM sudah terdaftar."); return;
@@ -1518,11 +1534,12 @@ function renderAnggota(){
             <td>${escapeHTML(a.prodi)}</td>
             <td>${escapeHTML(a.wa||"-")}</td>
             <td><span class="badge ${a.status==="Tidak Aktif"?"badge-danger":"badge-success"}">${escapeHTML(a.status||"Aktif")}</span></td>
+            <td>${a.mulaiKas?escapeHTML(fmtBulanKas(a.mulaiKas)):"umum"}</td>
             <td class="admin-only"><div class="actions">
                 <button class="btn btn-sm btn-warning" onclick="editAnggota('${a.id}')">Edit</button>
                 <button class="btn btn-sm btn-danger" onclick="deleteAnggota('${a.id}')">Hapus</button>
             </div></td>
-        </tr>`).join("") : emptyRow(9,"Belum ada data anggota.");
+        </tr>`).join("") : emptyRow(10,"Belum ada data anggota.");
 }
 
 function editAnggota(id){
@@ -1541,6 +1558,7 @@ function editAnggota(id){
     $("anggotaSemester").value = a.semester;
     $("anggotaWa").value = a.wa||"";
     $("anggotaStatus").value = a.status||"Aktif";
+    $("anggotaMulaiKas").value = a.mulaiKas||"";
     $("anggotaModalTitle").textContent = "Edit Anggota";
     openModal("anggotaModal");
 }
@@ -2167,7 +2185,9 @@ async function logout(){
 
 async function boot(){
     if(!sb){
-        showAuth("login","⚠️ Konfigurasi cloud belum diisi. Isi SUPABASE_URL dan SUPABASE_ANON_KEY di bagian script, lalu muat ulang. Lihat PANDUAN-DEPLOY.md.");
+        showAuth("login", window.supabase
+            ? "⚠️ Konfigurasi cloud belum diisi. Isi SUPABASE_URL dan SUPABASE_ANON_KEY di bagian script, lalu muat ulang. Lihat PANDUAN-DEPLOY.md."
+            : "⚠️ Tidak bisa terhubung ke server karena pustaka Supabase gagal dimuat. Pastikan internet aktif (atau CDN tidak diblokir), lalu muat ulang halaman.");
         $("loginForm").style.display = "none";
         $("guestBox").style.display = "none";
         $("authDivider").style.display = "none";
@@ -2366,12 +2386,6 @@ function calculateUnpaid(){
     const dueDay = Number(db.settings.jatuhTempo)||10;
     const now = new Date();
     const curIdx = now.getFullYear()*12 + now.getMonth();
-    let startIdx = curIdx;
-    if(db.settings.kasMulai){
-        const [y,m] = db.settings.kasMulai.split("-").map(Number);
-        if(y && m) startIdx = y*12 + (m-1);
-    }
-    startIdx = Math.max(Math.min(startIdx,curIdx),curIdx-35);
 
     const paid = {};
     db.pembayaran.forEach(p=>{
@@ -2387,7 +2401,7 @@ function calculateUnpaid(){
     let total = 0, telat = 0;
     db.anggota.filter(m=>m.status!=="Tidak Aktif").forEach(m=>{
         const bulan = []; let kurangTotal = 0, isLate = false;
-        for(let idx=startIdx; idx<=curIdx; idx++){
+        for(let idx=kasStartIdx(m,curIdx); idx<=curIdx; idx++){
             const rec = paid[m.id+"|"+idx] || {dibayar:0,wajib:0};
             const kurang = Math.max((rec.wajib||wajibDefault)-rec.dibayar,0);
             if(kurang>0){
@@ -2628,13 +2642,14 @@ function renderBayar(){
     $("payInfo").innerHTML=(P.qris?`<img src="${P.qris}" style="display:block;max-width:260px;width:100%;margin:0 auto 12px;border-radius:12px">`:'<p class="hint">QRIS belum diatur.</p>')+(P.rek||[]).map(r=>`<div style="padding:8px 0;border-top:1px solid var(--border)"><b>${escapeHTML(r.bank)}</b> ${escapeHTML(r.no)}<br><small>a.n. ${escapeHTML(r.an)}</small></div>`).join("");
     if(document.activeElement!==$("payRek")) $("payRek").value=(P.rek||[]).map(r=>[r.bank,r.no,r.an].join("|")).join("\n");
     const cur=$("pbMhs").value; $("pbMhs").innerHTML='<option value="">Pilih nama anggota</option>'+db.anggota.filter(x=>x.status!=="Tidak Aktif").sort((a,b)=>a.nama.localeCompare(b.nama)).map(x=>`<option value="${x.id}">${escapeHTML(x.nama)}</option>`).join(""); $("pbMhs").value=cur;
-    if(!$("pbBulan").options.length){ $("pbBulan").innerHTML=BULAN.map(b=>`<option>${b}</option>`).join(""); $("pbBulan").value=BULAN[new Date().getMonth()]; $("pbNom").value=db.settings.kasWajib||""; }
+    if(!$("pbBulan").options.length){ const Y=new Date().getFullYear(); $("pbTahun").innerHTML=[Y-1,Y,Y+1].map(y=>`<option>${y}</option>`).join(""); $("pbTahun").value=String(Y); $("pbBulan").innerHTML=BULAN.map(b=>`<option>${b}</option>`).join(""); $("pbBulan").value=BULAN[new Date().getMonth()]; $("pbNom").value=db.settings.kasWajib||""; }
 }
 function kirimBukti(){
+    if(!sb){ alert("Tidak terhubung ke server. Periksa internet lalu muat ulang halaman."); return; }
     const mid=$("pbMhs").value, f=$("pbFile").files[0], nom=Number($("pbNom").value);
     if(!mid||!nom||!f){ alert("Pilih nama, isi nominal, dan lampirkan foto bukti."); return; }
     shrinkImg(f,async img=>{
-        const m=db.anggota.find(x=>x.id===mid), rec={anggotaId:mid,nama:m.nama,bulan:$("pbBulan").value,tahun:String(new Date().getFullYear()),nominal:nom,metode:$("pbMet").value,tanggal:today(),bukti:img};
+        const m=db.anggota.find(x=>x.id===mid), rec={anggotaId:mid,nama:m.nama,bulan:$("pbBulan").value,tahun:$("pbTahun").value||String(new Date().getFullYear()),nominal:nom,metode:$("pbMet").value,tanggal:today(),bukti:img};
         const {error}=await sb.from("bukti_bayar").insert({id:generateId(),data:rec});
         if(error){ alert("Gagal mengirim: "+error.message+"\n(Pastikan tabel bukti_bayar sudah dibuat di Supabase.)"); return; }
         $("pbFile").value=""; showToast("Bukti terkirim. Menunggu konfirmasi bendahara.");
@@ -2649,12 +2664,13 @@ async function loadPending(){
 }
 function showBukti(id){ const p=PEND.find(x=>x.id===id); if(!p) return; const o=document.createElement("div"); o.style.cssText="position:fixed;inset:0;background:#000b;z-index:9999;display:grid;place-items:center;padding:16px"; o.innerHTML=`<img src="${p.bukti}" style="max-width:100%;max-height:92vh;border-radius:10px">`; o.onclick=()=>o.remove(); document.body.appendChild(o); }
 async function terimaBukti(id){
+    if(!sb) return;
     const p=PEND.find(x=>x.id===id), m=p&&db.anggota.find(x=>x.id===(p.anggotaId||p.mahasiswaId)); if(!p) return;
     if(!m){ alert("Anggota tidak ditemukan di Data Anggota BEM."); return; }
     db.pembayaran.push({id:generateId(),anggotaId:m.id,nama:m.nama,divisi:m.divisi,jabatan:m.jabatan,bulan:p.bulan,tahun:p.tahun,wajib:Number(db.settings.kasWajib)||p.nominal,dibayar:p.nominal,tanggal:today(),metode:p.metode});
     saveDB(); await sb.from("bukti_bayar").delete().eq("id",id); showToast("Pembayaran diterima & dicatat."); loadPending();
 }
-async function tolakBukti(id){ if(!confirm("Tolak bukti ini?")) return; await sb.from("bukti_bayar").delete().eq("id",id); loadPending(); }
+async function tolakBukti(id){ if(!sb||!confirm("Tolak bukti ini?")) return; await sb.from("bukti_bayar").delete().eq("id",id); loadPending(); }
 function parseCSV(t){ t=t.replace(/^\uFEFF/,""); const d=((t.split(/\r?\n/)[0]||"").match(/;/g)||[]).length>((t.split(/\r?\n/)[0]||"").match(/,/g)||[]).length?";":",", rows=[]; let r=[],c="",q=false;
     for(let i=0;i<t.length;i++){ const ch=t[i]; if(q){ if(ch==='"'&&t[i+1]==='"'){c+='"';i++} else if(ch==='"') q=false; else c+=ch; } else if(ch==='"') q=true; else if(ch===d){r.push(c);c=""} else if(ch==="\n"||ch==="\r"){ if(ch==="\r"&&t[i+1]==="\n")i++; r.push(c);c=""; if(r.some(x=>x.trim()))rows.push(r); r=[]; } else c+=ch; }
     r.push(c); if(r.some(x=>x.trim()))rows.push(r); return rows; }
@@ -2685,7 +2701,8 @@ const CSV_ALIAS = {
     prodi:["prodi","programstudi","jurusan"],
     semester:["semester","smt"],
     wa:["wa","whatsapp","nowa","nomorwa","nowhatsapp","nomorwhatsapp","nohp","nomorhp","hp","telepon","notelepon","telp"],
-    status:["status","keaktifan"]
+    status:["status","keaktifan"],
+    mulai:["mulai","mulaikas","mulaibayar","bulanmulai","mulaiditagih"]
 };
 function canonHeader(h){
     const n=String(h||"").toLowerCase().replace(/[^a-z0-9]/g,"");
@@ -2699,6 +2716,14 @@ function normWa(v){
     if(n.startsWith("8")) n="0"+n;          // Excel sering menghapus angka 0 di depan
     return n;
 }
+function normBulanKas(v){          // terima 2026-09, 09/2026, 9-2026, atau "September 2026"
+    v=String(v||"").trim(); if(!v) return "";
+    let m=v.match(/^(\d{4})[-\/](\d{1,2})/); if(m) return m[1]+"-"+m[2].padStart(2,"0");
+    m=v.match(/^(\d{1,2})[-\/](\d{4})$/); if(m) return m[2]+"-"+m[1].padStart(2,"0");
+    m=v.toLowerCase().match(/^([a-z]+)\s+(\d{4})$/);
+    if(m){ const i=BULAN.findIndex(b=>b.toLowerCase().startsWith(m[1].slice(0,3))); if(i>=0) return m[2]+"-"+String(i+1).padStart(2,"0"); }
+    return "";
+}
 function headerReport(h){
     const ignored=h.filter(x=>x.startsWith("?")).map(x=>x.slice(1)).filter(Boolean);
     return ignored.length ? `\nKolom diabaikan (nama tidak dikenal): ${ignored.join(", ")}` : "";
@@ -2708,7 +2733,7 @@ function headerReport(h){
 const DIVISI_LIST = ["Ketua","Sekretaris","Bendahara","Pendidikan","Kesma Faspel","Ibadah","Perkebunan","Medinfo","Humas"];
 function tplCSVAnggota(){
     const a=document.createElement("a");
-    a.href=URL.createObjectURL(new Blob(["\uFEFFnama,nim,divisi,jabatan,prodi,semester,wa,status\nContoh Nama,2501031001,Bendahara,Bendahara BEM,IAT,3,081234567890,Aktif\n"],{type:"text/csv"}));
+    a.href=URL.createObjectURL(new Blob(["\uFEFFnama,nim,divisi,jabatan,prodi,semester,wa,status,mulai\nContoh Nama,2501031001,Bendahara,Bendahara BEM,IAT,3,081234567890,Aktif,2026-09\n"],{type:"text/csv"}));
     a.download="template-anggota-bem.csv"; a.click(); URL.revokeObjectURL(a.href);
 }
 function impCSVAnggota(ev){
@@ -2729,7 +2754,8 @@ function impCSVAnggota(ev){
             const cocok=DIVISI_LIST.find(d=>d.toLowerCase()===divisi.toLowerCase());
             if(cocok) divisi=cocok; else if(divisi) divisiBaru++;
             add.push({id:generateId(),nama,nim,divisi,jabatan:g("jabatan"),prodi:g("prodi"),semester:g("semester"),wa:normWa(g("wa")),
-                      status:g("status").toLowerCase()==="tidak aktif"?"Tidak Aktif":"Aktif"});
+                      status:g("status").toLowerCase()==="tidak aktif"?"Tidak Aktif":"Aktif",
+                      mulaiKas:normBulanKas(g("mulai"))});
         });
         if(!add.length){ alert("Tidak ada anggota baru. Dilewati (sudah ada): "+dup); return; }
         let msg=`Impor ${add.length} anggota baru? (${dup} dilewati karena sudah ada)`;
